@@ -58,11 +58,17 @@ def p(o):
     print(json.dumps(o, indent=4))
 
 
-CACHE = set()
+from cachetools import TTLCache
+# Having a TTL on this means that if meeting changes will be reflected.
+# For example, if a meeting is opened, it is entered into cache (so it's not re-opened over and over). However, if that meeting 
+#  is then, say, last minute changed, and pushed 30 minutes back, then this script will no longer open the meeting. 
+#  Having a TTL of 10 minutes means that as long as the meeting changes are beyond a 10 minute window, then it's fine. In theory, 
+#  we could set this TTL to however early timeMin is checking for events (currently 5 minutes)
+cache = TTLCache(maxsize=1000, ttl=600)  
 def cache(meeting_id):
     if meeting_id in CACHE:
         return False
-    CACHE.add(meeting_id)
+    CACHE[meeting_id] = 0  # insert into cache
     return True
 
 
@@ -70,8 +76,8 @@ def poll(service, creds):
     try:
         # Call the Calendar API
         now = datetime.utcnow()
-        timeMin = (now - timedelta(minutes=5)).isoformat() + "Z"  # 'Z' indicates UTC time
-        timeMax = (now + timedelta(seconds=JOIN_ADVANCE)).isoformat() + "Z"
+        timeMin = (now - timedelta(minutes=5)).isoformat() + "Z" # inspect 5 minutes in advance so as to not miss any events.
+        timeMax = (now + timedelta(seconds=JOIN_ADVANCE)).isoformat() + "Z"  # 'Z' indicates UTC time
         print("Getting events...")
         events_result = (
             service.events()
