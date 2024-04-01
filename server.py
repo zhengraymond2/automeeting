@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 import time
 import webbrowser
 import os.path
+import os
+import sys
+import threading
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -15,6 +18,15 @@ SCOPES = [
     "https://www.googleapis.com/auth/calendar.events.readonly",
 ]
 POLL_RATE = 8 # seconds
+JOIN_ADVANCE = 30 # how early to join the meeting
+assert POLL_RATE < 300
+
+
+def alarm():
+    def play_sound():
+        for _ in range(15):
+            os.system(f"afplay /System/Library/Sounds/Glass.aiff")
+    threading.Thread(target=play_sound).start()
 
 
 def auth():
@@ -58,9 +70,9 @@ def poll(service, creds):
     try:
         # Call the Calendar API
         now = datetime.utcnow()
-        timeMin = now.isoformat() + "Z"  # 'Z' indicates UTC time
-        timeMax = (now + timedelta(minutes=5)).isoformat() + "Z"
-        print("Getting the upcoming 10 events")
+        timeMin = (now - timedelta(minutes=5)).isoformat() + "Z"  # 'Z' indicates UTC time
+        timeMax = (now + timedelta(seconds=JOIN_ADVANCE)).isoformat() + "Z"
+        print("Getting events...")
         events_result = (
             service.events()
             .list(
@@ -79,12 +91,15 @@ def poll(service, creds):
             print("No upcoming events found.")
             return
         else:
+            print(f"Found {len(events)} events.")
             for event in events:
                 if cache(event["id"]):
-                    print(event["summary"])
-                    p(event)
+                    print("Opening", event["summary"])
                     webbrowser.open(event["hangoutLink"])
-                    print("="*50)
+                    if '--alarm' in sys.argv:
+                        alarm()
+                else:
+                    print(event["id"], "already opened")
     except HttpError as error:
         print(f"An error occurred: {error}")
 
