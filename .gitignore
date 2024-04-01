@@ -1,0 +1,9 @@
+# Ignore all dunder directories
+**/__*/
+
+# Ignore Python virtual environments
+venv/
+
+# ignore credentials
+credentials.json
+token.json
