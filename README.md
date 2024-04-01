@@ -1,6 +1,8 @@
 # Installation
 `./run.sh`
 
+`./run.sh --alarm` if you want an annoying audio alarm to play for 20 seconds in addition to opening the meeting (meeting window opens 30 seconds early so it won't impact your meeting).
+
 # Authentication requirements
 This requires you add a `credentials.json` to the repository root. You can obtain this credentials.json by creating a GCP app:
 - https://console.cloud.google.com/apis/
