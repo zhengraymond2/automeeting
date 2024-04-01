@@ -64,7 +64,7 @@ from cachetools import TTLCache
 #  is then, say, last minute changed, and pushed 30 minutes back, then this script will no longer open the meeting. 
 #  Having a TTL of 10 minutes means that as long as the meeting changes are beyond a 10 minute window, then it's fine. In theory, 
 #  we could set this TTL to however early timeMin is checking for events (currently 5 minutes)
-cache = TTLCache(maxsize=1000, ttl=600)  
+CACHE = TTLCache(maxsize=1000, ttl=600)  
 def cache(meeting_id):
     if meeting_id in CACHE:
         return False
@@ -99,7 +99,7 @@ def poll(service, creds):
         else:
             print(f"Found {len(events)} events.")
             for event in events:
-                if cache(event["id"]):
+                if cache(event["id"]) and "hangoutLink" in event:
                     print("Opening", event["summary"])
                     webbrowser.open(event["hangoutLink"])
                     if '--alarm' in sys.argv:
