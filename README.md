@@ -1,3 +1,7 @@
+# Notes:
+- does not work for zoom links.
+- if you punt a meeting AFTER the alarm has already opened the meeting, and you only punt it by a short time (<10 minutes), it will not reopen it again after 10 minutes.
+
 # Installation
 `./run.sh`
 
