@@ -58,13 +58,11 @@ def p(o):
     print(json.dumps(o, indent=4))
 
 
-from cachetools import TTLCache
 # Having a TTL on this means that if meeting changes will be reflected.
 # For example, if a meeting is opened, it is entered into cache (so it's not re-opened over and over). However, if that meeting 
-#  is then, say, last minute changed, and pushed 30 minutes back, then this script will no longer open the meeting. 
-#  Having a TTL of 10 minutes means that as long as the meeting changes are beyond a 10 minute window, then it's fine. In theory, 
-#  we could set this TTL to however early timeMin is checking for events (currently 5 minutes)
-CACHE = TTLCache(maxsize=1000, ttl=600)  
+#  is then, say, last minute changed, and pushed back, then this script will no longer open the meeting.
+from cachetools import TTLCache
+CACHE = TTLCache(maxsize=1000, ttl=3600+300)  
 def cache(meeting_id):
     if meeting_id in CACHE:
         return False
@@ -101,6 +99,7 @@ def poll(service, creds):
             for event in events:
                 if cache(event["id"]) and "hangoutLink" in event:
                     print("Opening", event["summary"])
+                    p(event)
                     webbrowser.open(event["hangoutLink"])
                     if '--alarm' in sys.argv:
                         alarm()
@@ -111,11 +110,17 @@ def poll(service, creds):
 
 
 def main():
-    creds = auth()
-    service = build("calendar", "v3", credentials=creds)
     while True:
-        poll(service, creds)
-        time.sleep(POLL_RATE)
+        try:
+            creds = auth()
+            service = build("calendar", "v3", credentials=creds)
+            while True:
+                poll(service, creds)
+                time.sleep(POLL_RATE)
+            return
+        except:
+            print("Could not start poller, trying again in 30 seconds...")
+            time.sleep(30)
 
 if __name__ == '__main__':
     main()
