@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# Create and activate virtual environment
-python3 -m venv venv
-source env/bin/activate
+cd "$(dirname "$0")"
 
-# Install dependencies
-pip install -r requirements.txt
+source venv/bin/activate
 
-# Run the script
-python server.py $1
+python3 server.py

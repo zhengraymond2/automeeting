@@ -3,7 +3,6 @@ import time
 import webbrowser
 import os.path
 import os
-import sys
 import threading
 
 from google.auth.transport.requests import Request
@@ -22,12 +21,11 @@ JOIN_ADVANCE = 30 # how early to join the meeting
 assert POLL_RATE < 300
 
 
-def alarm():
+def alarm(times):
     def play_sound():
-        for _ in range(15):
+        for _ in range(times):
             os.system(f"afplay /System/Library/Sounds/Glass.aiff")
     threading.Thread(target=play_sound).start()
-
 
 def auth():
     """Shows basic usage of the Google Calendar API.
@@ -101,11 +99,11 @@ def poll(service, creds):
                     print("Opening", event["summary"])
                     p(event)
                     webbrowser.open(event["hangoutLink"])
-                    if '--alarm' in sys.argv:
-                        alarm()
+                    alarm(times=15)
                 else:
                     print(event["id"], "already opened")
     except HttpError as error:
+        alarm(times=1)
         print(f"An error occurred: {error}")
 
 
@@ -120,6 +118,7 @@ def main():
             return
         except:
             print("Could not start poller, trying again in 30 seconds...")
+            alarm(times=1)
             time.sleep(30)
 
 if __name__ == '__main__':
