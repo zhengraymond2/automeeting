@@ -18,6 +18,7 @@ PLIST="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <key>ProgramArguments</key>
 <array>
     <string>${DIR}/run.sh</string>
+    <string>--alarm</string>
 </array>
 <key>RunAtLoad</key>
 <true/>
@@ -34,6 +35,8 @@ launchctl unload ~/Library/LaunchAgents/automeeting.plist
 launchctl load ~/Library/LaunchAgents/automeeting.plist
 
 # XBAR:
-if [ -d "~/Library/Application Support/xbar/plugins/" ]; then
-    cp ./checkAutomeeting.1s.sh "~/Library/Application Support/xbar/plugins/checkAutomeeting.1s.sh"
+if [ -d "$HOME/Library/Application Support/xbar/plugins/" ]; then
+    echo "enabling xbar plugin"
+    cp ./checkAutomeeting.1s.sh "$HOME/Library/Application Support/xbar/plugins/checkAutomeeting.1s.sh"
 fi
+

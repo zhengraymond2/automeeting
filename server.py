@@ -3,6 +3,7 @@ import time
 import webbrowser
 import os.path
 import os
+import sys
 import threading
 
 from google.auth.transport.requests import Request
@@ -99,7 +100,8 @@ def poll(service, creds):
                     print("Opening", event["summary"])
                     p(event)
                     webbrowser.open(event["hangoutLink"])
-                    alarm(times=15)
+                    if '--alarm' in sys.argv:
+                        alarm(times=15)
                 else:
                     print(event["id"], "already opened")
     except HttpError as error:

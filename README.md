@@ -3,20 +3,16 @@
 - if you punt a meeting AFTER the alarm has already opened the meeting, it may be missed
 
 # Installation
-`./run.sh` This will create a system service plist file, then launch it. 
+`./setup.sh` 
+if you want audio alarms, `./setupAlarm.sh`. 
+Both setup scripts can be run repeatedly if you change your mind about the audio.
 
-If you want to remove the audio alarms, update `server.py`'s alarm() method to do nothing, then relaunch the plist:
-```
-launchctl unload ~/Library/LaunchAgents/automeeting.plist
-launchctl load ~/Library/LaunchAgents/automeeting.plist
-```
+The scripts should run on startup, and play audio alarms if it's running into errors. 
 
-The automeeting script should then always be running. It will make ringing noises if it's encountering errors (such as network issues). 
+# Xbar
+As a sanity check, you can install [xbar](https://github.com/matryer/xbar-plugins) to view the status of AutoMeeting on your status bar + play annoying sounds if AutoMeeting isn't running for whatever reason.
 
-You can also add a status checker as a sanity check to make sure automeeting is actually running without error. Download and install xbar (https://github.com/matryer/xbar-plugins), then copy the checkAutomeeting.1s.py into "~/Library/Application Support/xbar/plugins/checkAutomeeting.1s.py":
-```
-cp checkAutomeeting.1s.py ~/Library/Application\ Support/xbar/plugins/checkAutomeeting.1s.py
-```
+To enable this, install xbar, then rerun the setup.sh (or setupAlarm.sh) scripts.
 
 # Authentication requirements
 This requires you add a `credentials.json` to the repository root. You can obtain this credentials.json by creating a GCP app:
