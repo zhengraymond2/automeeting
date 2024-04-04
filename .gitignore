@@ -7,3 +7,6 @@ venv/
 # ignore credentials
 credentials.json
 token.json
+
+# script resources
+resources/

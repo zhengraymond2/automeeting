@@ -3,11 +3,13 @@
 - if you punt a meeting AFTER the alarm has already opened the meeting, it may be missed
 
 # Installation
-`./setup.sh` 
-if you want audio alarms, `./setupAlarm.sh`. 
-Both setup scripts can be run repeatedly if you change your mind about the audio.
+1. install xbar
+2. modify checkAutomeeting.py's shebang to match your username
+3. Then run `./setup.sh` 
 
-The scripts should run on startup, and play audio alarms if it's running into errors. 
+The scripts should then run on startup, and play audio alarms if it's running into errors. 
+
+To remove alarms, comment out the appropriates lines in ./checkAutomeeting.1m.py and then rerun setup.sh
 
 # Xbar
 As a sanity check, you can install [xbar](https://github.com/matryer/xbar-plugins) to view the status of AutoMeeting on your status bar + play annoying sounds if AutoMeeting isn't running for whatever reason.

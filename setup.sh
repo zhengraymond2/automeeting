@@ -5,35 +5,13 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 
-# Get the current directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-# Create the plist content
-PLIST="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-<key>Label</key>
-<string>automeetingScript</string>
-<key>ProgramArguments</key>
-<array>
-    <string>${DIR}/run.sh</string>
-</array>
-<key>RunAtLoad</key>
-<true/>
-<key>KeepAlive</key>
-<true/>
-</dict>
-</plist>"
-
-# Write the plist content to the plist file
-echo "$PLIST" > ~/Library/LaunchAgents/automeeting.plist
-
-# launch the plist
-launchctl unload ~/Library/LaunchAgents/automeeting.plist
-launchctl load ~/Library/LaunchAgents/automeeting.plist
-
 # XBAR:
-if [ -d "~/Library/Application Support/xbar/plugins/" ]; then
-    cp ./checkAutomeeting.1s.sh "~/Library/Application Support/xbar/plugins/checkAutomeeting.1s.sh"
+if [ -d "$HOME/Library/Application Support/xbar/plugins/" ]; then
+    xbar_dir="$HOME/Library/Application Support/xbar/plugins/"
+    echo "enabling xbar plugin"
+    cp checkAutomeeting.py "$xbar_dir/checkAutomeeting.1m.py"
+    mkdir -p "$xbar_dir/resources"
+    cp credentials.json "$xbar_dir/resources/credentials.json"
+    touch "$xbar_dir/resources/CACHE"
 fi
+
