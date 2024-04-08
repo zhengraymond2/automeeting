@@ -18,7 +18,6 @@ from googleapiclient.errors import HttpError
 new_dir = os.path.join(os.environ['HOME'], 'Library/Application Support/xbar/plugins/')
 os.chdir(new_dir)
 
-
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
@@ -27,6 +26,7 @@ SCOPES = [
 POLL_RATE = 8 # seconds
 JOIN_ADVANCE = 30 # how early to join the meeting
 assert POLL_RATE < 300
+MSG_LIMIT = 30
 
 LOG_FILE = "resources/automeeting.log"
 def log(message):
@@ -108,17 +108,18 @@ def parse_time(event):
         if hours == 0:
             return f"{minutes}m"
         else:
-            return f"{hours}h:{minutes:02d}m"
+            return f"{hours}:{minutes:02d}"
     else:
         # If they are different days, display the difference in days
         days = (start.date() - now.date()).days
         if days == 1:
-            return f"Tomorrow at {start.strftime('%H:%M')}"
+            return f"_Tmr@{start.strftime('%H:%M')}"
         else:
             return f"{days}d"
 
 def get_next_event(service):
-    now = datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
+    now_ts = datetime.utcnow().replace(tzinfo=pytz.UTC).astimezone(pytz.timezone('US/Pacific'))
+    now = now_ts.isoformat().rsplit("-", 1)[0] + "Z"  # 'Z' indicates UTC time
     events_result = (
         service.events()
         .list(
@@ -137,13 +138,15 @@ def get_next_event(service):
         for event in events:
             if is_personal_block(event):
                 continue
-            else:
-                break
+            start = datetime.fromisoformat(event["start"].get("dateTime", event["start"].get("date")))
+            if now_ts > start + timedelta(minutes=6):
+                continue
+            break
         
         summary = event['summary']
-        if len(summary) > 20:
-             summary = summary[:20] + "..."
-        return f"{summary}: {parse_time(event)}"
+        if len(summary) > MSG_LIMIT:
+             summary = summary[:MSG_LIMIT] + ".."
+        return f"{summary}{parse_time(event)}"
 
 def open_meetings(service):
     # Call the Calendar API
@@ -181,8 +184,7 @@ def open_meetings(service):
             log(f"Opening {summary}")
             p(event, log_only=True)
             webbrowser.open(event["hangoutLink"])
-            if '--alarm' in sys.argv:
-                alarm("Meeting about to begin", times=10)
+            alarm("Meeting about to begin", times=10)
 
 def poll():
     try:
@@ -191,9 +193,8 @@ def poll():
 
         open_meetings(service)
         print(get_next_event(service))  # prints out to xbar
-    except HttpError as error:
-        alarm("Automeeting failed with a network error")
-        log(f"An error occurred: {error}")
-        print("ERROR | color=red")
+    except Exception as e:
+        alarm("Automeeting Error")
+        raise e
 
 poll()
